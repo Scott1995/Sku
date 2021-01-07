@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <style>
+        .red{
+            background: red
+        }
+        .blue{
+            background: green
+        }
+        #app{
+            width: 500px;
+            height: 200px;
+            margin: 0 auto;
+        }
+    </style>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <div v-for="(value, type) in selectArr">
+            <button v-for="attr in value" :class="myclass(attr, type)"  @click="addId(attr, type)">{{attr.name}}</button>
+        </div>
+        <div v-for="sku in all_sku">
+            <span v-for="(data, type) in selectArr">
+                <span v-for="value in data">
+                    <span v-if="value.id == sku[type]">
+                        {{value.name}}
+                    </span>
+                </span>
+            </span>
+        </div>
+    </div>
+    <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.9/vue.js"></script>
+<script>
+    new Vue({
+        el: "#app",
+        data:{
+            name:1,
+            current: {color: 0, memory: 0, version: 0},
+            all_sku: [
+                {color: 1, memory: 4, version: 7},
+                {color: 1, memory: 4, version: 8},
+                {color: 2, memory: 5, version: 9}
+            ],
+            selectArr: {
+                color: [{id: 1, disable: 0,name:"红色"}, {id: 2, disable: 0,name:"蓝色" }, {id: 3, disable: 0, name:"黑色"}],
+                memory: [{id: 4, disable: 0,name:"64"}, {id: 5, disable: 0,name:"128"}, {id: 6, disable: 0,name:"256"}],
+                version: [{id: 7, disable: 0,name:"移动"}, {id: 8, disable: 0,name:"联通"}, {id: 9, disable: 0,name:"电信"}],
+            }
+        },
+        created(){
+            this.checkSku()
+        },
+        methods:{
+            addId(attr, type){
+                if(!attr.disable){
+                    if(this.current[type]>0 && this.current[type] == attr.id){
+                        this.current[type] = 0;
+                    } else {
+                        this.current[type] = attr.id;
+                    }
+                    this.checkSku()
+                }
+            },
+            checkSku(){
+                for (const type in this.selectArr) {
+                    this.selectArr[type].forEach((color, index) => {
+                        let temp = JSON.parse(JSON.stringify(this.current))
+                        temp[type] = color.id;
+                        let length = this.all_sku.filter(sku => {
+                            return (temp.color == 0 || temp.color == sku.color )
+                            && (temp.memory == 0 || temp.memory == sku.memory )
+                            && (temp.version == 0 || temp.version == sku.version )
+                        }).length;
+                        color.disable = length == 0
+                    })
+                }
+            },
+            myclass(field, type){
+                let s = [];
+                if(field.disable){
+                    s.push('red');
+                }
+                if(this.current[type] == field.id){
+                    s.push("blue")
+                }
+                return s.join(" ")
+            }
+        }
+    });
+</script>
+</body>
+</html>
+
+
+const length = this.all_sku.filter(sku => {
+                            return ['color', 'memory', 'version'].filter(field=>{
+                                return temp[field] == 0 || temp[field] == sku[field]
+                            }).length == 3
+                        }).length;
+
+const length = this.all_sku.filter(sku => {
+                            let i = 0;
+                            for (const field in sku) {
+                                if( temp[field] == 0 || temp[field] == sku[field]){
+                                    i++;
+                                }
+                            }
+                            return i == 3;
+                        }).length;
